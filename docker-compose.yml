@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  muhtojuz_redis:
+    image: redis:7.0-alpine
+    container_name: "muhtojuz_redis"
+    restart: on-failure
+
+  muhtojuz_bot:
+    container_name: "muhtojuz_bot"
+    build: .
+    image: muhtojuz_bot:latest
+    depends_on:
+      - muhtojuz_redis
+    env_file:
+      - '.env'
+    restart: on-failure

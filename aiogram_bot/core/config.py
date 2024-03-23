@@ -4,6 +4,7 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 BASE_DIR = pathlib.Path(__file__).parents[1]
+print(BASE_DIR)
 
 
 class Settings(BaseSettings):

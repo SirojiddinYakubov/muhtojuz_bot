@@ -1,7 +1,7 @@
 import asyncio
 
-from bot.core import bot, dp
-from bot.core.middleware import register_middlewares
+from core import bot, dp
+from core.middleware import register_middlewares
 
 
 async def main():
