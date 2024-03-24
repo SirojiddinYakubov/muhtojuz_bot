@@ -1,19 +1,22 @@
 import uuid
 
-from aiogram import Bot, Router
+from aiogram import Bot, Router, types
+from aiogram.enums import ParseMode
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.handlers import InlineQueryHandler
-from aiogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-    Message,
-)
+from aiogram.types import *
+# (
+#
+#     # InlineKeyboardButton,
+#     # InlineKeyboardMarkup,
+#     # InlineQueryResultArticle,
+#     # InputTextMessageContent,
+#     # Message,
+# )
 from aiogram.types.inline_query_results_button import InlineQueryResultsButton
 from aiogram.types.switch_inline_query_chosen_chat import SwitchInlineQueryChosenChat
 from aiogram.utils.deep_linking import create_start_link
-from application.utils import get_application_by_id
+from application.utils import get_application_by_id, generate_progress_message
 from common.callbacks import InlineQueryFactory
 
 common_router = Router(name=__name__)
@@ -21,7 +24,7 @@ common_router = Router(name=__name__)
 
 @common_router.message(CommandStart())
 async def message_handler(
-    message: Message, bot: Bot, command: CommandObject
+        message: Message, bot: Bot, command: CommandObject
 ) -> Message:
     print("salom")
     args = command.args
@@ -39,21 +42,63 @@ class MyInlineQueryHandler(InlineQueryHandler):
         if application_id:
             application = await get_application_by_id(application_id)
             if application:
-                text = f"Application: {application['patient']['first_name'].capitalize()} {application['patient']['last_name'].capitalize()}"
+                text = '2222222222'
                 item = InputTextMessageContent(
-                    message_text=text,
+                    message_text="""🫂{title}\n\n❗️{description} <a href="https://telegra.ph/">Batafsil o'qish</a>\n\n🧾 Kerakli summa: UZS {required_amount:0,.0f}\n🔀 Sababi: {reason}\n✅ Yig'ildi: UZS {total_donations:0,.0f}\n‼️ Yig'ilishi kerak: UZS {need_collect:0,.0f}\n\n{progress_message}\n\n#Leykoz #Oqqon
+                                                    """.format(
+                        title=application["title"],
+                        description=application["description"],
+                        required_amount=float(application["required_amount"]["amount"]),
+                        reason=application["disease_category"]["title"],
+                        total_donations=application["total_donations"],
+                        need_collect=float(application["required_amount"]["amount"]) - float(
+                            application["total_donations"]),
+                        progress_message=generate_progress_message(
+                            float(application["required_amount"]["amount"]), application["total_donations"]
+                        )
+                    ),
                 )
-                description = """🧾 Kerakli summa: UZS 175,000,000\n
-🔀 Sababi: Ilik ko'chirish operatsiyasi uchun\n
-✅ Yig'ildi: UZS 75,000,000\n
-‼️ Yig'ilishi kerak: UZS 100,000,000"""
-                print(application["image"])
-                result = InlineQueryResultArticle(
+                # Ma'lumotlarni kiritish
+                title = application["title"]
+                description = application["description"]
+                required_amount = float(application["required_amount"]["amount"])
+                reason = application["disease_category"]["title"]
+                total_donations = application["total_donations"]
+                need_collect = float(application["required_amount"]["amount"]) - float(application["total_donations"])
+                progress_message = generate_progress_message(float(application["required_amount"]["amount"]),
+                                                             application["total_donations"])
+
+                # Stringni formatlash
+                formatted_message = f"🫂{title}\n\n❗️{description}\n\n*🧾 Kerakli summa:* UZS {required_amount:0,.0f}\n🔀 Sababi: {reason}\n✅ Yig'ildi: UZS {total_donations:0,.0f}\n‼️ Yig'ilishi kerak: UZS {need_collect:0,.0f}\n\n{progress_message}\n\n#Leykoz #Oqqon"
+
+                print(formatted_message)
+
+                # item = InputTextMessageContent(
+                #
+                #     # media='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/2019_Toyota_Corolla_Icon_Tech_VVT-i_Hybrid_1.8.jpg/1200px-2019_Toyota_Corolla_Icon_Tech_VVT-i_Hybrid_1.8.jpg',
+                #     # parse_mode=ParseMode.HTML,
+                #
+                # )
+                description = "🧾 Kerak: UZS {required_amount:0,.0f}\n✅ Yig'ildi: UZS {total_donations:0,.0f}".format(
+                    required_amount=float(application["required_amount"]["amount"]),
+                    total_donations=application["total_donations"],
+                )
+                result = InlineQueryResultPhoto(
                     id=str(uuid.uuid4()),
-                    title=text,
+                    title=f"ID: {application['id']} | {application['patient']['first_name'].capitalize()} {application['patient']['last_name'].capitalize()}",
                     description=description,
                     thumbnail_url="https://0e75-93-170-220-216.ngrok-free.app/media/upload/applications/images/photo_2024-03-24_10-39-41_LEjf2g8.jpg",
-                    input_message_content=item,
+                    photo_url="https://0e75-93-170-220-216.ngrok-free.app/media/upload/applications/images/photo_2024"
+                              "-03-24_10-39-41_LEjf2g8.jpg",
+                    caption=formatted_message,
+                    parse_mode=ParseMode.MARKDOWN_V2,
+                    # input_message_content=item,
+                    photo_width=1200,
+                    photo_height=1200,
+                    photo_size=200,
+
+                    # photo_url="",
+
                 )
                 return await self.event.answer(results=[result], cache_time=60)
 
@@ -93,7 +138,6 @@ class MyInlineQueryHandler(InlineQueryHandler):
             cache_time=60,
             button=button,
         )
-
 
 # @common_router.callback_query(InlineQueryFactory.filter(F.action == "call"))
 # async def inline_query_handler(
