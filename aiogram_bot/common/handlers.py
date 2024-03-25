@@ -1,3 +1,4 @@
+import random
 import uuid
 
 from aiogram import Bot, Router, types
@@ -43,34 +44,51 @@ class MyInlineQueryHandler(InlineQueryHandler):
             application = await get_application_by_id(application_id)
             if application:
                 text = '2222222222'
-                item = InputTextMessageContent(
-                    message_text="""🫂{title}\n\n❗️{description} <a href="https://telegra.ph/">Batafsil o'qish</a>\n\n🧾 Kerakli summa: UZS {required_amount:0,.0f}\n🔀 Sababi: {reason}\n✅ Yig'ildi: UZS {total_donations:0,.0f}\n‼️ Yig'ilishi kerak: UZS {need_collect:0,.0f}\n\n{progress_message}\n\n#Leykoz #Oqqon
-                                                    """.format(
-                        title=application["title"],
-                        description=application["description"],
-                        required_amount=float(application["required_amount"]["amount"]),
-                        reason=application["disease_category"]["title"],
-                        total_donations=application["total_donations"],
-                        need_collect=float(application["required_amount"]["amount"]) - float(
-                            application["total_donations"]),
-                        progress_message=generate_progress_message(
-                            float(application["required_amount"]["amount"]), application["total_donations"]
-                        )
-                    ),
-                )
+                # item = InputTextMessageContent(
+                #     message_text="""🫂{title}\n\n❗️{description} <a href="https://telegra.ph/">Batafsil o'qish</a>\n\n🧾 Kerakli summa: UZS {required_amount:0,.0f}\n🔀 Sababi: {reason}\n✅ Yig'ildi: UZS {total_donations:0,.0f}\n‼️ Yig'ilishi kerak: UZS {need_collect:0,.0f}\n\n{progress_message}\n\n#Leykoz #Oqqon
+                #                                     """.format(
+                #         title=application["title"],
+                #         description=application["description"],
+                #         required_amount=float(application["required_amount"]["amount"]),
+                #         # reason=dieses,
+                #         total_donations=application["total_donations"],
+                #         need_collect=float(application["required_amount"]["amount"]) - float(
+                #             application["total_donations"]),
+                #         progress_message=generate_progress_message(
+                #             float(application["required_amount"]["amount"]), application["total_donations"]
+                #         )
+                #     ),
+                # )
                 # Ma'lumotlarni kiritish
                 title = application["title"]
                 description = application["description"]
                 required_amount = float(application["required_amount"]["amount"])
-                reason = application["disease_category"]["title"]
+                # reason = application["disease_category"]["title"]
                 total_donations = application["total_donations"]
                 need_collect = float(application["required_amount"]["amount"]) - float(application["total_donations"])
                 progress_message = generate_progress_message(float(application["required_amount"]["amount"]),
                                                              application["total_donations"])
 
                 # Stringni formatlash
-                formatted_message = f"🫂{title}\n\n❗️{description}\n\n*🧾 Kerakli summa:* UZS {required_amount:0,.0f}\n🔀 Sababi: {reason}\n✅ Yig'ildi: UZS {total_donations:0,.0f}\n‼️ Yig'ilishi kerak: UZS {need_collect:0,.0f}\n\n{progress_message}\n\n#Leykoz #Oqqon"
-
+                dieses_hashtags = ""
+                for hashtag in application["disease_category"]:
+                    print(hashtag)
+                    dieses_hashtags += f"<a href='{hashtag['wikipedia_url']}'>#{hashtag['title']}</a> "
+                formatted_message = f"<b>🫂{title}</b>\n\n❗️{description}\n\n<b>🧾 Kerakli summa:</b> UZS {required_amount:0,.0f}\n🔀 <b>Sababi:</b> Operatsiya\n✅ <b>Yig'ildi:</b> UZS {total_donations:0,.0f}\n<b>‼️ Yig'ilishi kerak:</b> UZS {need_collect:0,.0f}\n\n{progress_message}\n\n<b>{dieses_hashtags}</b>"
+#                 formatted_message = """<b>Success:</b>
+# ✅ Test 1
+# ✅ Test 3
+# ✅ Test 4
+#
+# <b>Failed:</b>
+# ❌ Test 2
+#
+# <b>Summary:</b>
+#   <b>Total:</b> 4
+#   <b>Success:</b> 3
+#   <b>Failed:</b> 1
+#
+# #test"""
                 print(formatted_message)
 
                 # item = InputTextMessageContent(
@@ -83,24 +101,45 @@ class MyInlineQueryHandler(InlineQueryHandler):
                     required_amount=float(application["required_amount"]["amount"]),
                     total_donations=application["total_donations"],
                 )
+
+                # print()
                 result = InlineQueryResultPhoto(
                     id=str(uuid.uuid4()),
                     title=f"ID: {application['id']} | {application['patient']['first_name'].capitalize()} {application['patient']['last_name'].capitalize()}",
                     description=description,
-                    thumbnail_url="https://0e75-93-170-220-216.ngrok-free.app/media/upload/applications/images/photo_2024-03-24_10-39-41_LEjf2g8.jpg",
-                    photo_url="https://0e75-93-170-220-216.ngrok-free.app/media/upload/applications/images/photo_2024"
-                              "-03-24_10-39-41_LEjf2g8.jpg",
+                    photo_url=application['image'],
+                    thumbnail_url=application['image'],
                     caption=formatted_message,
-                    parse_mode=ParseMode.MARKDOWN_V2,
+                    parse_mode=ParseMode.HTML,
                     # input_message_content=item,
                     photo_width=1200,
                     photo_height=1200,
                     photo_size=200,
+                    reply_markup=InlineKeyboardMarkup(
+                        inline_keyboard=[
+                            [InlineKeyboardButton(text="⤴️ Ulashish",
+                                                  switch_inline_query_chosen_chat=SwitchInlineQueryChosenChat(
+                                                      query=str(application["id"]),
+                                                      allow_user_chats=True,
+                                                      allow_group_chats=True))],
+                            [random.choice(
+                                [
+                                    InlineKeyboardButton(text="♻️️ Medanta - Ko'zoynakdan xalos bo'ling",
+                                                         url="https://t.me/MedantaBukhara"),
+                                    InlineKeyboardButton(text="♻️ Dasturlash kurslari", url="https://t.me/GeeksOnline"),
+                                    InlineKeyboardButton(text="♻️ Best Motors - yuk avtomobillari",
+                                                         url="http://t.me/Bestmotors_uz")
+                                ],
+                            )]
 
+                        ]
+
+                    )
                     # photo_url="",
 
                 )
-                return await self.event.answer(results=[result], cache_time=60)
+
+                return await self.event.answer(results=[result], cache_time=5)
 
         item = InputTextMessageContent(
             message_text="Ariza yaratish InputTextMessageContent",
@@ -125,6 +164,7 @@ class MyInlineQueryHandler(InlineQueryHandler):
                     ]
                 ]
             ),
+
         )
 
         # link = await create_start_link(self.bot, user_id, encode=True)

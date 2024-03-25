@@ -5,7 +5,7 @@ async def get_application_by_id(application_id: int) -> dict | None:
     async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
     ) as session:
-        async with session.get(f"http://192.168.0.102:8000/api/applications/{application_id}/") as response:
+        async with session.get(f"https://9776-93-170-220-216.ngrok-free.app/api/applications/{application_id}/") as response:
             try:
                 resp_json = await response.json()
                 return resp_json
@@ -31,7 +31,8 @@ def generate_progress_message(required_amount, earned_amount):
 
     # Define progress bar characters
     full_block = "🟩"
-    empty_block = "◻️"
+    # empty_block = "◻️"
+    empty_block = "🟥️"
 
     # Calculate filled and empty blocks based on progress
     filled_blocks = full_block * int(progress_pct / 10)
