@@ -2,12 +2,14 @@ import aiohttp
 
 
 async def get_application_by_id(application_id: int) -> dict | None:
+    print(f"Appplication ID {application_id}")
     async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(ssl=False)
     ) as session:
-        async with session.get(f"https://9776-93-170-220-216.ngrok-free.app/api/applications/{application_id}/") as response:
+        async with session.get(f"https://954d-93-170-220-216.ngrok-free.app/api/applications/{application_id}/") as response:
             try:
                 resp_json = await response.json()
+            
                 return resp_json
             except Exception as e:
                 print("Error: ", e)
